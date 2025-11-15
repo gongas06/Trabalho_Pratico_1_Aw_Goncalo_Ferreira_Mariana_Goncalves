@@ -1,11 +1,9 @@
-const express = require('express');
+import express from "express";
+import { createAdotante, getAdotantes } from "../controllers/adotanteController.js";
+
 const router = express.Router();
-const adotanteController = require('../controllers/adotanteController');
 
-router.post('/', adotanteController.criar);
-router.get('/', adotanteController.listar);
-router.get('/:id', adotanteController.obter);
-router.put('/:id', adotanteController.atualizar);
-router.delete('/:id', adotanteController.remover);
+router.get("/", getAdotantes);
+router.post("/", createAdotante);
 
-module.exports = router;
+export default router;

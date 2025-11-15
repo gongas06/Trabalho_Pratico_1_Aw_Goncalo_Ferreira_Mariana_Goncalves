@@ -1,23 +1,19 @@
-const express = require('express');
-const cors = require('cors');
+import express from "express";
+import authRoutes from "./routes/auth.js";
+import animalRoutes from "./routes/animais.js";
+import adotanteRoutes from "./routes/adotantes.js";
+import adocaoRoutes from "./routes/adocoes.js";
+import categoriaRoutes from "./routes/categorias.js";
+import partilhaRoutes from "./routes/partilhas.js";
+
 const app = express();
-
-const adotantesRoutes = require('./routes/adotantes');
-const animaisRoutes = require('./routes/animais');
-const adocoesRoutes = require('./routes/adocoes');
-
-app.use(cors());
 app.use(express.json());
 
-app.use('/adotantes', adotantesRoutes);
-app.use('/animais', animaisRoutes);
-app.use('/adocoes', adocoesRoutes);
+app.use("/auth", authRoutes);
+app.use("/animais", animalRoutes);
+app.use("/adotantes", adotanteRoutes);
+app.use("/adocoes", adocaoRoutes);
+app.use("/categorias", categoriaRoutes);
+app.use("/partilhas", partilhaRoutes);
 
-// ERRO GLOBAL
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ success: false, error: 'Erro interno do servidor' });
-});
-
-const PORT = 3000;
-app.listen(PORT, () => console.log(`API a correr em http://localhost:${PORT}`));
+app.listen(3000, () => console.log("Servidor a correr na porta 3000"));

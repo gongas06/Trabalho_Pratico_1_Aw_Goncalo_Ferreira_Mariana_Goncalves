@@ -1,11 +1,11 @@
-const express = require('express');
+import express from "express";
+import { getAnimais, createAnimal, toggleFavorito } from "../controllers/animalController.js";
+import { authMiddleware } from "../middleware/auth.js";
+
 const router = express.Router();
-const animalController = require('../controllers/animalController');
 
-router.post('/', animalController.criar);
-router.get('/', animalController.listar);
-router.get('/:id', animalController.obter);
-router.put('/:id', animalController.atualizar);
-router.delete('/:id', animalController.remover);
+router.get("/", authMiddleware, getAnimais);
+router.post("/", authMiddleware, createAnimal);
+router.put("/:id/favorito", authMiddleware, toggleFavorito);
 
-module.exports = router;
+export default router;

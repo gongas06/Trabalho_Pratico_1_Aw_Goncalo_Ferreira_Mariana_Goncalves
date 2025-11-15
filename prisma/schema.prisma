@@ -3,8 +3,32 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// MODELOS PRINCIPAIS
+//
+
+model Animal {
+  id          Int        @id @default(autoincrement())
+  nome        String
+  especie     String
+  idade       Int
+  descricao   String?
+  favorito    Boolean    @default(false)
+  foto        String?    // Anexo (bónus)
+  
+  // Relação com Categoria
+  categoriaId Int?
+  categoria   Categoria? @relation(fields: [categoriaId], references: [id])
+
+  // Relação com Adoções
+  adocoes     Adocao[]
+
+  // Partilhas
+  partilhas   Partilha[]
 }
 
 model Adotante {
@@ -12,24 +36,68 @@ model Adotante {
   nome     String
   telefone String
   email    String   @unique
-  adocoes  Adocao[]
-}
-
-model Animal {
-  id       Int      @id @default(autoincrement())
-  nome     String
-  especie  String
-  idade    Int
+  
   adocoes  Adocao[]
 }
 
 model Adocao {
-  id          Int      @id @default(autoincrement())
-  data        DateTime @default(now())
-  estado      String   @default("pendente")
+  id          Int           @id @default(autoincrement())
+  data        DateTime      @default(now())
+  estado      EstadoAdocao  @default(PENDENTE)
+  notas       String?
+
   adotanteId  Int
   animalId    Int
 
   adotante    Adotante @relation(fields: [adotanteId], references: [id])
   animal      Animal   @relation(fields: [animalId], references: [id])
+}
+
+//
+// AUTENTICAÇÃO
+//
+
+model User {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+
+  partilhas Partilha[]
+}
+
+//
+// CATEGORIAS
+//
+
+model Categoria {
+  id      Int      @id @default(autoincrement())
+  nome    String
+  animais Animal[]
+}
+
+//
+// PARTILHAS
+//
+
+model Partilha {
+  id       Int    @id @default(autoincrement())
+  
+  userId   Int
+  animalId Int
+
+  user     User   @relation(fields: [userId], references: [id])
+  animal   Animal @relation(fields: [animalId], references: [id])
+}
+
+//
+// ENUMS
+//
+
+enum EstadoAdocao {
+  PENDENTE
+  APROVADA
+  RECUSADA
+  CONCLUIDA
 }

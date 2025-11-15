@@ -1,76 +1,40 @@
-const prisma = require('../prisma/client');
-const { z } = require('zod');
+import prisma from "../prisma/client.js";
 
-const animalSchema = z.object({
-  nome: z.string().min(2),
-  especie: z.string().min(2),
-  idade: z.number().int().nonnegative(),
-});
+export const getAnimais = async (req, res) => {
+  const { especie, categoria, favorito } = req.query;
 
-// Criar
-exports.criar = async (req, res, next) => {
-  try {
-    animalSchema.parse(req.body);
+  const animais = await prisma.animal.findMany({
+    where: {
+      especie: especie || undefined,
+      categoria: categoria ? { nome: categoria } : undefined,
+      favorito: favorito === "true" ? true : undefined,
+    },
+    include: { categoria: true }
+  });
 
-    const animal = await prisma.animal.create({
-      data: req.body,
-    });
-
-    res.status(201).json({ success: true, data: animal });
-  } catch (err) {
-    next(err);
-  }
+  res.json(animais);
 };
 
-// Listar
-exports.listar = async (req, res, next) => {
-  try {
-    const animais = await prisma.animal.findMany();
-    res.json({ success: true, data: animais });
-  } catch (err) {
-    next(err);
-  }
+export const createAnimal = async (req, res) => {
+  const { nome, especie, idade, descricao, categoriaId } = req.body;
+
+  const animal = await prisma.animal.create({
+    data: { nome, especie, idade: Number(idade), descricao, categoriaId }
+  });
+
+  res.json(animal);
 };
 
-// Buscar por ID
-exports.buscar = async (req, res, next) => {
-  try {
-    const animal = await prisma.animal.findUnique({
-      where: { id: Number(req.params.id) }
-    });
+export const toggleFavorito = async (req, res) => {
+  const { id } = req.params;
 
-    if (!animal) {
-      return res.status(404).json({ success: false, error: "Não encontrado" });
-    }
+  const animal = await prisma.animal.findUnique({ where: { id: Number(id) } });
 
-    res.json({ success: true, data: animal });
-  } catch (err) {
-    next(err);
-  }
+  const updated = await prisma.animal.update({
+    where: { id: Number(id) },
+    data: { favorito: !animal.favorito },
+  });
+
+  res.json(updated);
 };
 
-// Atualizar
-exports.atualizar = async (req, res, next) => {
-  try {
-    const animal = await prisma.animal.update({
-      where: { id: Number(req.params.id) },
-      data: req.body
-    });
-
-    res.json({ success: true, data: animal });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// Apagar
-exports.apagar = async (req, res, next) => {
-  try {
-    await prisma.animal.delete({
-      where: { id: Number(req.params.id) }
-    });
-    res.json({ success: true, message: "Removido com sucesso" });
-  } catch (err) {
-    next(err);
-  }
-};
