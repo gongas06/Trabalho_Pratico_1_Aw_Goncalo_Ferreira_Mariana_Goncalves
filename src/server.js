@@ -16,4 +16,4 @@ app.use("/adocoes", adocaoRoutes);
 app.use("/categorias", categoriaRoutes);
 app.use("/partilhas", partilhaRoutes);
 
-app.listen(3000, () => console.log("Servidor a correr na porta 3000"));
+app.listen(3000, () => console.log("Servidor a correr em http://localhost:3000"));
