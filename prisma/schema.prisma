@@ -7,50 +7,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 //
 // MODELOS PRINCIPAIS
 //
 
 model Animal {
-  id          Int        @id @default(autoincrement())
-  nome        String
-  especie     String
-  idade       Int
-  descricao   String?
-  favorito    Boolean    @default(false)
-  foto        String?    // Anexo (bónus)
-  
+  id        Int     @id @default(autoincrement())
+  nome      String
+  especie   String
+  idade     Int
+  descricao String?
+  favorito  Boolean @default(false)
+  foto      String? // Anexo (bónus)
+
   // Relação com Categoria
   categoriaId Int?
   categoria   Categoria? @relation(fields: [categoriaId], references: [id])
 
   // Relação com Adoções
-  adocoes     Adocao[]
+  adocoes Adocao[]
 
   // Partilhas
-  partilhas   Partilha[]
+  partilhas Partilha[]
+
+  // Favoritos (lado inverso)
+  favoritos Favorito[]
 }
 
 model Adotante {
-  id       Int      @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   nome     String
   telefone String
-  email    String   @unique
-  
-  adocoes  Adocao[]
+  email    String @unique
+
+  adocoes Adocao[]
 }
 
 model Adocao {
-  id          Int           @id @default(autoincrement())
-  data        DateTime      @default(now())
-  estado      EstadoAdocao  @default(PENDENTE)
-  notas       String?
+  id     Int          @id @default(autoincrement())
+  data   DateTime     @default(now())
+  estado EstadoAdocao @default(PENDENTE)
+  notas  String?
 
-  adotanteId  Int
-  animalId    Int
+  adotanteId Int
+  animalId   Int
 
-  adotante    Adotante @relation(fields: [adotanteId], references: [id])
-  animal      Animal   @relation(fields: [animalId], references: [id])
+  adotante Adotante @relation(fields: [adotanteId], references: [id])
+  animal   Animal   @relation(fields: [animalId], references: [id])
 }
 
 //
@@ -58,13 +63,14 @@ model Adocao {
 //
 
 model User {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   nome      String
-  email     String    @unique
+  email     String   @unique
   password  String
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   partilhas Partilha[]
+  favoritos Favorito[] // <--- RELAÇÃO INVERSA ADICIONADA
 }
 
 //
@@ -82,13 +88,29 @@ model Categoria {
 //
 
 model Partilha {
-  id       Int    @id @default(autoincrement())
-  
+  id Int @id @default(autoincrement())
+
   userId   Int
   animalId Int
 
-  user     User   @relation(fields: [userId], references: [id])
-  animal   Animal @relation(fields: [animalId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  animal Animal @relation(fields: [animalId], references: [id])
+}
+
+//
+// FAVORITOS
+//
+
+model Favorito {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  animalId  Int
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  animal Animal @relation(fields: [animalId], references: [id])
+
+  @@unique([userId, animalId])
 }
 
 //
